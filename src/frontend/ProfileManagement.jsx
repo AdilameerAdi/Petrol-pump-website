@@ -1,12 +1,16 @@
 import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileManagement() {
+  const { user, logout, token } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
 
   const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john@example.com",
-    username: "john123",
+    name: user?.username || "John Doe",
+    email: user?.email || "john@example.com",
+    username: user?.username || "john123",
   });
 
   const [usernameData, setUsernameData] = useState({
@@ -20,20 +24,164 @@ export default function ProfileManagement() {
     reEnterPassword: "",
   });
 
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [usernameLoading, setUsernameLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
   const handleProfileChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
+    setMessage("");
+    setError("");
   };
 
   const handleUsernameChange = (e) => {
     setUsernameData({ ...usernameData, [e.target.name]: e.target.value });
+    setMessage("");
+    setError("");
   };
 
   const handlePasswordChange = (e) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    setMessage("");
+    setError("");
+  };
+
+  const handleProfileSave = async () => {
+    setProfileLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: profile.name,
+          email: profile.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Profile updated successfully!');
+        setIsEditing(false);
+      } else {
+        setError(data.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleUsernameUpdate = async () => {
+    if (!usernameData.currentPassword || !usernameData.newUsername) {
+      setError('Please fill all fields');
+      return;
+    }
+
+    setUsernameLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/username', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: usernameData.currentPassword,
+          newUsername: usernameData.newUsername
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Username updated successfully!');
+        setUsernameData({ currentPassword: "", newUsername: "" });
+        setProfile({ ...profile, username: usernameData.newUsername });
+      } else {
+        setError(data.message || 'Failed to update username');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setUsernameLoading(false);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.reEnterPassword) {
+      setError('Please fill all fields');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.reEnterPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    setPasswordLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Password updated successfully!');
+        setPasswordData({ currentPassword: "", newPassword: "", reEnterPassword: "" });
+      } else {
+        setError(data.message || 'Failed to update password');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
+      {/* Header with Logout */}
+      <div className="flex justify-between items-center bg-white shadow-lg rounded-xl p-4">
+        <h1 className="text-2xl font-bold text-gray-800">Profile Management</h1>
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-600">Welcome, {user?.username}</span>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-200"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
       {/* Profile Info Section */}
       <div className="bg-white shadow-lg rounded-xl p-6 space-y-4">
         <div className="flex justify-between items-center">
@@ -83,12 +231,34 @@ export default function ProfileManagement() {
         {isEditing && (
           <button
             type="button"
-            className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 shadow-md transition duration-200 mt-4"
+            onClick={handleProfileSave}
+            disabled={profileLoading}
+            className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 shadow-md transition duration-200 mt-4 disabled:opacity-50 flex items-center"
           >
-            Save Changes
+            {profileLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
           </button>
         )}
       </div>
+
+      {/* Success/Error Messages */}
+      {message && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {message}
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
 
       {/* Username & Password Sections in a row */}
       <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -117,8 +287,19 @@ export default function ProfileManagement() {
               />
             </div>
           </div>
-          <button className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 shadow-md transition duration-200 mt-4">
-            Update Username
+          <button 
+            onClick={handleUsernameUpdate}
+            disabled={usernameLoading}
+            className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 shadow-md transition duration-200 mt-4 disabled:opacity-50 flex items-center"
+          >
+            {usernameLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Updating...
+              </>
+            ) : (
+              'Update Username'
+            )}
           </button>
         </div>
 
@@ -157,8 +338,19 @@ export default function ProfileManagement() {
               />
             </div>
           </div>
-          <button className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 shadow-md transition duration-200 mt-4">
-            Update Password
+          <button 
+            onClick={handlePasswordUpdate}
+            disabled={passwordLoading}
+            className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 shadow-md transition duration-200 mt-4 disabled:opacity-50 flex items-center"
+          >
+            {passwordLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Updating...
+              </>
+            ) : (
+              'Update Password'
+            )}
           </button>
         </div>
       </div>

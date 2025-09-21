@@ -1,20 +1,34 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // add this
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // initialize
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (username === "adil" && password === "123") {
-      setError("");
-      navigate("/home"); // navigate to Home
-    } else {
-      setError("Invalid username or password");
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home");
     }
+  }, [isAuthenticated, navigate]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const result = await login(username, password);
+    
+    if (result.success) {
+      navigate("/home");
+    } else {
+      setError(result.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -67,9 +81,17 @@ export default function Login() {
             {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
             <button
               type="submit"
-              className="bg-orange-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:bg-orange-600 transition transform duration-300"
+              disabled={loading}
+              className="bg-orange-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:bg-orange-600 transition transform duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Login
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
         </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
   FaFileInvoiceDollar,
   FaCashRegister,
@@ -15,18 +16,24 @@ import {
 export default function Sidebar() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const navigate = useNavigate();
+  const { logout, user } = useAuth();
 
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
   };
 
   const handleLogout = () => {
-    navigate("/"); // Redirect to login
+    logout();
   };
 
   return (
     <div className=" bg-gradient-to-b from-[#4f46e5] via-[#6366f1] to-[#818cf8] text-white p-6 flex flex-col shadow-xl min-h-screen rounded-sm">
-      <h2 className="text-2xl font-bold mb-6 text-white">Menu</h2>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white">Menu</h2>
+        {user && (
+          <p className="text-sm text-white/80 mt-1">Welcome, {user.name || user.username}</p>
+        )}
+      </div>
       <ul className="space-y-2">
         <li
           className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-300 font-medium hover:bg-white hover:text-[#4f46e5] hover:shadow-md transform hover:scale-105 group"

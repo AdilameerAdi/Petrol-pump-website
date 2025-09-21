@@ -1,25 +1,50 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./frontend/login";
 import HomeLayout from "./frontend/components/HomeLayout";
-import HomeContent from "./frontend/components/HomeContent"; // import it
+import HomeContent from "./frontend/components/HomeContent";
 import ManageAdmin from "./frontend/ManageAdmin";
 import AddAdmin from "./frontend/AddAdmin";
 import ProfileManagement from "./frontend/ProfileManagement";
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
 
-        {/* HomeLayout wraps all pages that need sidebar */}
-        <Route path="/home" element={<HomeLayout />}>
-          <Route index element={<HomeContent />} /> {/* <-- set HomeContent here */}
-          <Route path="manage-admin" element={<ManageAdmin />} />
-          <Route path="add-admin" element={<AddAdmin />} />
-          <Route path="profile-management" element={<ProfileManagement />} />
-        </Route>
-      </Routes>
-    </Router>
+          {/* Protected routes */}
+          <Route path="/home" element={
+            <ProtectedRoute>
+              <HomeLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={
+              <ProtectedRoute>
+                <HomeContent />
+              </ProtectedRoute>
+            } />
+            <Route path="manage-admin" element={
+              <ProtectedRoute>
+                <ManageAdmin />
+              </ProtectedRoute>
+            } />
+            <Route path="add-admin" element={
+              <ProtectedRoute>
+                <AddAdmin />
+              </ProtectedRoute>
+            } />
+            <Route path="profile-management" element={
+              <ProtectedRoute>
+                <ProfileManagement />
+              </ProtectedRoute>
+            } />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
