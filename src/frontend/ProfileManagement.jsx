@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { userService } from "../services/userService";
 
 export default function ProfileManagement() {
   const { user, logout, token } = useAuth();
@@ -54,28 +55,15 @@ export default function ProfileManagement() {
     setMessage("");
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: profile.name,
-          email: profile.email
-        })
+      await userService.updateProfile(user.id, {
+        name: profile.name,
+        email: profile.email
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Profile updated successfully!');
-        setIsEditing(false);
-      } else {
-        setError(data.message || 'Failed to update profile');
-      }
+      
+      setMessage('Profile updated successfully!');
+      setIsEditing(false);
     } catch (error) {
-      setError('Network error. Please try again.');
+      setError(error.message || 'Failed to update profile');
     } finally {
       setProfileLoading(false);
     }
@@ -92,29 +80,13 @@ export default function ProfileManagement() {
     setMessage("");
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/username', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: usernameData.currentPassword,
-          newUsername: usernameData.newUsername
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Username updated successfully!');
-        setUsernameData({ currentPassword: "", newUsername: "" });
-        setProfile({ ...profile, username: usernameData.newUsername });
-      } else {
-        setError(data.message || 'Failed to update username');
-      }
+      await userService.updateUsername(user.id, usernameData.newUsername);
+      
+      setMessage('Username updated successfully!');
+      setUsernameData({ currentPassword: "", newUsername: "" });
+      setProfile({ ...profile, username: usernameData.newUsername });
     } catch (error) {
-      setError('Network error. Please try again.');
+      setError(error.message || 'Failed to update username');
     } finally {
       setUsernameLoading(false);
     }
@@ -136,28 +108,12 @@ export default function ProfileManagement() {
     setMessage("");
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/password', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Password updated successfully!');
-        setPasswordData({ currentPassword: "", newPassword: "", reEnterPassword: "" });
-      } else {
-        setError(data.message || 'Failed to update password');
-      }
+      await userService.updatePassword(user.id, passwordData.newPassword);
+      
+      setMessage('Password updated successfully!');
+      setPasswordData({ currentPassword: "", newPassword: "", reEnterPassword: "" });
     } catch (error) {
-      setError('Network error. Please try again.');
+      setError(error.message || 'Failed to update password');
     } finally {
       setPasswordLoading(false);
     }

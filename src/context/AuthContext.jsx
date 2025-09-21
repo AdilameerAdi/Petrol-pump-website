@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
 
@@ -13,106 +13,98 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
-  const [socket, setSocket] = useState(null);
-
-  const API_URL = 'http://localhost:5000/api';
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
-    if (token) {
-      fetchCurrentUser();
-      initializeSocket();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
-
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await fetch(`${API_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-      } else {
-        logout();
+    // Check if user is stored in localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setSession({ user: { id: userData.id } });
+      } catch (error) {
+        localStorage.removeItem('user');
       }
+    }
+    setLoading(false);
+  }, []);
+
+  const fetchUserData = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setUser(data);
     } catch (error) {
-      console.error('Error fetching user:', error);
-      logout();
+      console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const initializeSocket = () => {
-    const newSocket = io('http://localhost:5000', {
-      auth: { token }
-    });
-
-    newSocket.on('connect', () => {
-      console.log('Connected to server');
-    });
-
-    newSocket.on('disconnect', () => {
-      console.log('Disconnected from server');
-    });
-
-    setSocket(newSocket);
-
-    return () => newSocket.close();
-  };
-
   const login = async (username, password) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password })
-      });
+      // Find user by username
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        setToken(data.token);
-        setUser(data.user);
-        return { success: true, message: data.message };
-      } else {
-        return { success: false, message: data.message };
+      if (userError || !userData) {
+        return { success: false, message: 'Invalid credentials' };
       }
+
+      // Verify password using bcrypt
+      const bcrypt = await import('bcryptjs');
+      const isValidPassword = await bcrypt.compare(password, userData.password_hash);
+      
+      if (!isValidPassword) {
+        return { success: false, message: 'Invalid credentials' };
+      }
+      
+      // Set user data directly and store in localStorage
+      setUser(userData);
+      setSession({ user: { id: userData.id } });
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Update last login
+      await supabase
+        .from('users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', userData.id);
+
+      // Navigate to home after successful login
+      setTimeout(() => {
+        window.location.href = '/home';
+      }, 100);
+
+      return { success: true, message: 'Login successful' };
     } catch (error) {
       return { success: false, message: 'Network error. Please try again.' };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
+  const logout = async () => {
+    localStorage.removeItem('user');
     setUser(null);
-    if (socket) {
-      socket.disconnect();
-      setSocket(null);
-    }
-    // Force redirect to login
+    setSession(null);
     window.location.href = '/login';
   };
 
   const value = {
     user,
-    token,
+    session,
     loading,
-    socket,
     login,
     logout,
-    isAuthenticated: !!user && !!token
+    isAuthenticated: !!user
   };
 
   return (

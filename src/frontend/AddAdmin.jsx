@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { userService } from "../services/userService";
 
 export default function AddAdmin() {
   const navigate = useNavigate();
@@ -47,40 +48,27 @@ export default function AddAdmin() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          role: formData.position || 'user',
-          name: formData.name,
-          mobile: formData.mobile
-        })
+      await userService.createUser({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: formData.position || 'user',
+        name: formData.name,
+        mobile: formData.mobile
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("User created successfully!");
-        setFormData({
-          name: "",
-          mobile: "",
-          position: "",
-          username: "",
-          email: "",
-          password: "",
-          confirmPassword: ""
-        });
-      } else {
-        setError(data.message || "Failed to create user");
-      }
+      setSuccess("User created successfully!");
+      setFormData({
+        name: "",
+        mobile: "",
+        position: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+      });
     } catch (error) {
-      setError("Network error. Please try again.");
+      setError(error.message || "Failed to create user");
     } finally {
       setLoading(false);
     }

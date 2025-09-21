@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Admin</title>
+</head>
+<body>
+    <h1>Create New Admin User</h1>
+    <button onclick="createAdmin()">Create Admin User</button>
+    <div id="result"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        import bcrypt from 'https://cdn.skypack.dev/bcryptjs';
+
+        const supabase = createClient(
+            'https://axwfflkvpeyzutvrjcpi.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4d2ZmbGt2cGV5enV0dnJqY3BpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NjY2NDAsImV4cCI6MjA3NDA0MjY0MH0.yYG8PFyp8mHkEQelckTq0XbFn2tsUh44PMH3nUdDhkQ'
+        );
+
+        window.createAdmin = async function() {
+            try {
+                // Delete old admins by username and email
+                await supabase.from('users').delete().eq('username', 'adil');
+                await supabase.from('users').delete().eq('username', 'admin');
+                await supabase.from('users').delete().eq('email', 'admin@petrolpump.com');
+                await supabase.from('users').delete().eq('email', 'adil@petrolpump.com');
+                
+                // Hash password
+                const hashedPassword = await bcrypt.hash('123', 10);
+                
+                // Create new admin
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([{
+                        username: 'admin',
+                        email: 'admin@petrolpump.com',
+                        password_hash: hashedPassword,
+                        name: 'Main Admin',
+                        mobile: '+1234567890',
+                        role: 'admin'
+                    }]);
+
+                if (error) throw error;
+                
+                document.getElementById('result').innerHTML = 'Admin created! Login with: admin/123';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
