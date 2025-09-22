@@ -8,6 +8,16 @@ import HomeContent from "./frontend/components/HomeContent";
 import ManageAdmin from "./frontend/ManageAdmin";
 import AddAdmin from "./frontend/AddAdmin";
 import ProfileManagement from "./frontend/ProfileManagement";
+import RegularEntry from "./frontend/RegularEntry";
+import ReadingEntry from "./frontend/ReadingEntry";
+import RateManagement from "./frontend/RateManagement";
+import PreviousReadings from "./frontend/PreviousReadings";
+import SalesSummary from "./frontend/SalesSummary";
+import Permissions from "./frontend/Permissions";
+import ExpenseRequest from "./frontend/ExpenseRequest";
+import HolidayRequest from "./frontend/HolidayRequest";
+import RequestManagement from "./frontend/RequestManagement";
+import Calculation from "./frontend/Calculation";
 export default function App() {
   return (
     <AuthProvider>
@@ -40,6 +50,56 @@ export default function App() {
             <Route path="profile-management" element={
               <ProtectedRoute>
                 <ProfileManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="regular-entry" element={
+              <ProtectedRoute>
+                <RegularEntry />
+              </ProtectedRoute>
+            } />
+            <Route path="reading-entry" element={
+              <ProtectedRoute>
+                <ReadingEntry />
+              </ProtectedRoute>
+            } />
+            <Route path="rate-management" element={
+              <ProtectedRoute>
+                <RateManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="previous-readings" element={
+              <ProtectedRoute>
+                <PreviousReadings />
+              </ProtectedRoute>
+            } />
+            <Route path="sales-summary" element={
+              <ProtectedRoute>
+                <SalesSummary />
+              </ProtectedRoute>
+            } />
+            <Route path="permissions" element={
+              <ProtectedRoute>
+                <Permissions />
+              </ProtectedRoute>
+            } />
+            <Route path="expense-request" element={
+              <ProtectedRoute>
+                <ExpenseRequest />
+              </ProtectedRoute>
+            } />
+            <Route path="holiday-request" element={
+              <ProtectedRoute>
+                <HolidayRequest />
+              </ProtectedRoute>
+            } />
+            <Route path="request-management" element={
+              <ProtectedRoute>
+                <RequestManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="calculation" element={
+              <ProtectedRoute>
+                <Calculation />
               </ProtectedRoute>
             } />
           </Route>
