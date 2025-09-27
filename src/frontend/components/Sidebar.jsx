@@ -47,8 +47,8 @@ export default function Sidebar() {
           Home
         </li>
 
-        {/* Admin/Manager only sections */}
-        {isAdminOrManager && (
+        {/* Admin only sections */}
+        {user?.role === 'admin' && (
           <>
             <li
               className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-300 font-medium hover:bg-white hover:text-[#4f46e5] hover:shadow-md transform hover:scale-105 group"
@@ -65,41 +65,43 @@ export default function Sidebar() {
               <FaCashRegister className="text-white group-hover:text-[#4f46e5] text-lg" />
               Cashier Management
             </li>
-
-            {/* Rate Management */}
-            <li className="cursor-pointer">
-              <div
-                className="flex items-center justify-between p-3 rounded-lg transition-all duration-300 font-medium hover:bg-white hover:text-[#4f46e5] hover:shadow-md transform hover:scale-105 group"
-                onClick={() => toggleDropdown("rate")}
-              >
-                <div className="flex items-center gap-3">
-                  <FaGasPump className="text-white group-hover:text-[#4f46e5] text-lg" />
-                  Rate Management
-                </div>
-                <FaChevronDown
-                  className={`transition-transform duration-300 text-white ${
-                    openDropdown === "rate" ? "rotate-180 group-hover:text-[#4f46e5]" : ""
-                  }`}
-                />
-              </div>
-              {openDropdown === "rate" && (
-                <ul className="ml-6 mt-2 space-y-1 text-white animate-slide-down">
-                  <li
-                    className="p-2 rounded-lg cursor-pointer hover:bg-white hover:text-[#4f46e5]"
-                    onClick={() => navigate("/home/rate-management")}
-                  >
-                    Set Fuel Rates
-                  </li>
-                  <li
-                    className="p-2 rounded-lg cursor-pointer hover:bg-white hover:text-[#4f46e5]"
-                    onClick={() => navigate("/home/previous-readings")}
-                  >
-                    Previous Readings
-                  </li>
-                </ul>
-              )}
-            </li>
           </>
+        )}
+
+        {/* Rate Management - Admin and Manager */}
+        {isAdminOrManager && (
+          <li className="cursor-pointer">
+            <div
+              className="flex items-center justify-between p-3 rounded-lg transition-all duration-300 font-medium hover:bg-white hover:text-[#4f46e5] hover:shadow-md transform hover:scale-105 group"
+              onClick={() => toggleDropdown("rate")}
+            >
+              <div className="flex items-center gap-3">
+                <FaGasPump className="text-white group-hover:text-[#4f46e5] text-lg" />
+                Rate Management
+              </div>
+              <FaChevronDown
+                className={`transition-transform duration-300 text-white ${
+                  openDropdown === "rate" ? "rotate-180 group-hover:text-[#4f46e5]" : ""
+                }`}
+              />
+            </div>
+            {openDropdown === "rate" && (
+              <ul className="ml-6 mt-2 space-y-1 text-white animate-slide-down">
+                <li
+                  className="p-2 rounded-lg cursor-pointer hover:bg-white hover:text-[#4f46e5]"
+                  onClick={() => navigate("/home/rate-management")}
+                >
+                  Set Fuel Rates
+                </li>
+                <li
+                  className="p-2 rounded-lg cursor-pointer hover:bg-white hover:text-[#4f46e5]"
+                  onClick={() => navigate("/home/previous-readings")}
+                >
+                  Previous Readings
+                </li>
+              </ul>
+            )}
+          </li>
         )}
 
         {/* Profile & Admin Section */}
@@ -110,7 +112,7 @@ export default function Sidebar() {
           >
             <div className="flex items-center gap-3">
               <FaCogs className="text-white group-hover:text-[#4f46e5] text-lg" />
-              {user?.role === 'cashier' ? 'Profile' : 'Admin'}
+              {user?.role === 'cashier' ? 'Profile' : user?.role === 'manager' ? 'MyProfile' : 'Admin'}
             </div>
             <FaChevronDown
               className={`transition-transform duration-300 text-white ${

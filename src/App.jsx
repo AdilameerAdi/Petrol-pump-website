@@ -18,6 +18,11 @@ import ExpenseRequest from "./frontend/ExpenseRequest";
 import HolidayRequest from "./frontend/HolidayRequest";
 import RequestManagement from "./frontend/RequestManagement";
 import Calculation from "./frontend/Calculation";
+import ExpensePermissions from "./frontend/ExpensePermissions";
+import HolidayPermissions from "./frontend/HolidayPermissions";
+import FuelDips from "./frontend/FuelDips";
+import FuelDipUpdate from "./frontend/FuelDipUpdate";
+import FuelDensity from "./frontend/FuelDensity";
 export default function App() {
   return (
     <AuthProvider>
@@ -100,6 +105,31 @@ export default function App() {
             <Route path="calculation" element={
               <ProtectedRoute>
                 <Calculation />
+              </ProtectedRoute>
+            } />
+            <Route path="expense-permissions" element={
+              <ProtectedRoute>
+                <ExpensePermissions />
+              </ProtectedRoute>
+            } />
+            <Route path="holiday-permissions" element={
+              <ProtectedRoute>
+                <HolidayPermissions />
+              </ProtectedRoute>
+            } />
+            <Route path="fuel-dips" element={
+              <ProtectedRoute>
+                <FuelDips />
+              </ProtectedRoute>
+            } />
+            <Route path="fuel-dip-update" element={
+              <ProtectedRoute>
+                <FuelDipUpdate />
+              </ProtectedRoute>
+            } />
+            <Route path="fuel-density" element={
+              <ProtectedRoute>
+                <FuelDensity />
               </ProtectedRoute>
             } />
           </Route>

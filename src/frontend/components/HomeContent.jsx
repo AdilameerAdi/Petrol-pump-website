@@ -26,9 +26,12 @@ export default function HomeContent() {
       title: "Permissions", 
       color: "text-green-500", 
       border: "border-green-500",
-      buttons: ["Expense Permission", "Holiday Permission"] 
+      buttons: [
+        { text: "Expense Permission", onClick: () => window.location.href = '/home/expense-permissions' },
+        { text: "Holiday Permission", onClick: () => window.location.href = '/home/holiday-permissions' }
+      ]
     },
-    { icon: FaTint, title: "Fuel Dips", color: "text-red-500", border: "border-red-500" }
+    { icon: FaTint, title: "Fuel Dips", color: "text-red-500", border: "border-red-500", onClick: () => window.location.href = '/home/fuel-dips' }
   ];
 
   const cards = isCashier ? cashierCards : adminCards;
@@ -61,9 +64,10 @@ export default function HomeContent() {
                   {card.buttons.map((btn, i) => (
                     <button
                       key={i}
+                      onClick={typeof btn === 'object' ? btn.onClick : undefined}
                       className="w-full py-2 px-4 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition"
                     >
-                      {btn}
+                      {typeof btn === 'object' ? btn.text : btn}
                     </button>
                   ))}
                 </div>

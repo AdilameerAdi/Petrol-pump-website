@@ -60,9 +60,8 @@ export default function Calculation() {
   const fetchApprovedExpenses = async () => {
     try {
       if (user?.id) {
-        const requests = await requestService.getUserRequests(user.id);
-        const approved = requests.filter(req => req.type === 'expense' && req.status === 'approved');
-        setApprovedExpenses(approved);
+        const unusedExpenses = await requestService.getUnusedApprovedExpenses(user.id);
+        setApprovedExpenses(unusedExpenses);
       }
     } catch (error) {
       console.error('Error fetching expenses:', error);
@@ -132,6 +131,13 @@ export default function Calculation() {
       };
 
       await salesService.saveSalesRecord(salesRecord);
+      
+      // Mark expenses as used in calculation
+      if (approvedExpenses.length > 0) {
+        const expenseIds = approvedExpenses.map(expense => expense.id);
+        await requestService.markExpensesAsUsed(expenseIds);
+      }
+      
       setMessage("Sales record saved successfully!");
       setTimeout(() => setMessage(""), 3000);
     } catch (error) {

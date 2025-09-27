@@ -86,5 +86,36 @@ export const userService = {
 
     if (error) throw error;
     return data;
+  },
+
+  // Update user (admin only)
+  async updateUser(userId, userData) {
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        name: userData.name,
+        username: userData.username,
+        email: userData.email,
+        mobile: userData.mobile,
+        role: userData.role,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Delete user (admin only)
+  async deleteUser(userId) {
+    const { data, error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', userId);
+
+    if (error) throw error;
+    return data;
   }
 };

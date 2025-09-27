@@ -58,5 +58,34 @@ export const requestService = {
 
     if (error) throw error;
     return data;
+  },
+
+  // Get unused approved expenses for calculation
+  async getUnusedApprovedExpenses(userId) {
+    const { data, error } = await supabase
+      .from('requests')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('type', 'expense')
+      .eq('status', 'approved')
+      .eq('used_in_calculation', false)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Mark expenses as used in calculation
+  async markExpensesAsUsed(expenseIds) {
+    const { data, error } = await supabase
+      .from('requests')
+      .update({
+        used_in_calculation: true,
+        used_date: new Date().toISOString().split('T')[0]
+      })
+      .in('id', expenseIds);
+
+    if (error) throw error;
+    return data;
   }
 };
