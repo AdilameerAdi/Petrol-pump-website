@@ -18,7 +18,7 @@ export default function HomeContent() {
     }
   ];
 
-  // Cards for admin/manager users
+  // Cards for admin users
   const adminCards = [
     { icon: FaFileAlt, title: "DSR Daily Sale Record", color: "text-blue-500", border: "border-blue-500" },
     { 
@@ -31,10 +31,43 @@ export default function HomeContent() {
         { text: "Holiday Permission", onClick: () => window.location.href = '/home/holiday-permissions' }
       ]
     },
-    { icon: FaTint, title: "Fuel Dips", color: "text-red-500", border: "border-red-500", onClick: () => window.location.href = '/home/fuel-dips' }
+    { 
+      icon: FaTint, 
+      title: "Fuel Dips", 
+      color: "text-red-500", 
+      border: "border-red-500",
+      buttons: [
+        { text: "Dip", onClick: () => window.location.href = '/home/fuel-dip-update' },
+        { text: "Density", onClick: () => window.location.href = '/home/fuel-density' }
+      ]
+    }
   ];
 
-  const cards = isCashier ? cashierCards : adminCards;
+  // Cards for manager users
+  const managerCards = [
+    { 
+      icon: FaClipboardList, 
+      title: "Permissions", 
+      color: "text-green-500", 
+      border: "border-green-500",
+      buttons: [
+        { text: "Expense Permission", onClick: () => window.location.href = '/home/expense-permissions' },
+        { text: "Holiday Permission", onClick: () => window.location.href = '/home/holiday-permissions' }
+      ]
+    },
+    { 
+      icon: FaTint, 
+      title: "Fuel Dips", 
+      color: "text-red-500", 
+      border: "border-red-500",
+      buttons: [
+        { text: "Dip", onClick: () => window.location.href = '/home/fuel-dip-update' },
+        { text: "Density", onClick: () => window.location.href = '/home/fuel-density' }
+      ]
+    }
+  ];
+
+  const cards = isCashier ? cashierCards : user?.role === 'manager' ? managerCards : adminCards;
 
   return (
     <div className=" mx-auto min-h-screen flex flex-col items-center bg-gray-50 p-10">
@@ -44,7 +77,7 @@ export default function HomeContent() {
       </h1>
 
       {/* Main Cards */}
-      <div className={`grid ${isCashier ? 'grid-cols-2' : 'grid-cols-3'} gap-8 w-full max-w-6xl`}>
+      <div className={`grid ${isCashier ? 'grid-cols-2' : user?.role === 'manager' ? 'grid-cols-2' : 'grid-cols-3'} gap-8 w-full max-w-6xl`}>
         {cards.map((card, index) => {
           const Icon = card.icon;
           return (
@@ -61,15 +94,22 @@ export default function HomeContent() {
               {/* Render buttons if they exist */}
               {card.buttons && (
                 <div className="flex flex-col space-y-3 w-full">
-                  {card.buttons.map((btn, i) => (
-                    <button
-                      key={i}
-                      onClick={typeof btn === 'object' ? btn.onClick : undefined}
-                      className="w-full py-2 px-4 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition"
-                    >
-                      {typeof btn === 'object' ? btn.text : btn}
-                    </button>
-                  ))}
+                  {card.buttons.map((btn, i) => {
+                    const isRedCard = card.color === "text-red-500";
+                    const buttonClass = isRedCard 
+                      ? "w-full py-2 px-4 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition"
+                      : "w-full py-2 px-4 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition";
+                    
+                    return (
+                      <button
+                        key={i}
+                        onClick={typeof btn === 'object' ? btn.onClick : undefined}
+                        className={buttonClass}
+                      >
+                        {typeof btn === 'object' ? btn.text : btn}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

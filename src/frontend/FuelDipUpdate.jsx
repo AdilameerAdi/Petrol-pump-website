@@ -93,11 +93,11 @@ export default function FuelDipUpdate() {
         {/* Header */}
         <div className="flex items-center mb-8">
           <button
-            onClick={() => navigate("/home/fuel-dips")}
+            onClick={() => navigate("/home")}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
           >
             <FaArrowLeft className="text-xl" />
-            <span className="text-lg">Back to Fuel Dips</span>
+            <span className="text-lg">Back to Dashboard</span>
           </button>
         </div>
 

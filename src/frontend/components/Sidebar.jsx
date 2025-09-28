@@ -68,8 +68,8 @@ export default function Sidebar() {
           </>
         )}
 
-        {/* Rate Management - Admin and Manager */}
-        {isAdminOrManager && (
+        {/* Rate Management - Admin only */}
+        {user?.role === 'admin' && (
           <li className="cursor-pointer">
             <div
               className="flex items-center justify-between p-3 rounded-lg transition-all duration-300 font-medium hover:bg-white hover:text-[#4f46e5] hover:shadow-md transform hover:scale-105 group"

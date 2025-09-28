@@ -20,7 +20,6 @@ import RequestManagement from "./frontend/RequestManagement";
 import Calculation from "./frontend/Calculation";
 import ExpensePermissions from "./frontend/ExpensePermissions";
 import HolidayPermissions from "./frontend/HolidayPermissions";
-import FuelDips from "./frontend/FuelDips";
 import FuelDipUpdate from "./frontend/FuelDipUpdate";
 import FuelDensity from "./frontend/FuelDensity";
 export default function App() {
@@ -115,11 +114,6 @@ export default function App() {
             <Route path="holiday-permissions" element={
               <ProtectedRoute>
                 <HolidayPermissions />
-              </ProtectedRoute>
-            } />
-            <Route path="fuel-dips" element={
-              <ProtectedRoute>
-                <FuelDips />
               </ProtectedRoute>
             } />
             <Route path="fuel-dip-update" element={
